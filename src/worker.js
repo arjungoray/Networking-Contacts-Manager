@@ -1,7 +1,5 @@
-import { ConvexHttpClient } from 'convex/browser';
-import { api } from './convex/_generated/api.js';
 import { generateText } from 'ai';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { createGroq } from '@ai-sdk/groq';
 import { authenticateRequest } from './middleware.js';
 import { convexTools } from './convex-tools.js';
 
@@ -93,14 +91,14 @@ async function handleProtectedRoute(request, env) {
     globalThis.BASE_URL = env.BASE_URL;
 
     // Initialize the AI model and tools
-    const google = createGoogleGenerativeAI({
-      apiKey: env.GOOGLE_API_KEY, // Use env instead of process.env
+    const groq = createGroq({
+      apiKey: env.GROQ_API_KEY,
     });
     const tools = convexTools(convexToken, env);
 
     // Call the AI with the enhanced system prompt
     const { text: finalResponseText } = await generateText({
-      model: google("models/gemini-2.5-flash-lite"),
+      model: groq("moonshotai/kimi-k2-instruct"),
       messages: messages,
       tools: tools,
       system: `You are a world-class contact management assistant. You have two modes of response.

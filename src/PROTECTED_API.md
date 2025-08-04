@@ -1,8 +1,8 @@
-# Protected API Endpoint Documentation
+# Contacs API Endpoint Documentation
 
 ## Endpoint
 
-`POST localhost:8787/protected`
+`POST https://ai-caption-backend.arjungoray.workers.dev/`
 
 ---
 
@@ -88,7 +88,7 @@ This endpoint provides a protected interface for interacting with a world-class 
 
 ### Request
 ```
-POST /protected
+POST /
 Authorization: Bearer <token>
 Content-Type: application/json
 

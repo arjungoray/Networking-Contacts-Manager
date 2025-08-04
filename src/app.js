@@ -1,12 +1,10 @@
 import express from 'express';
 import cors from 'cors';
 import { ConvexHttpClient } from 'convex/browser';
-import { api } from './convex/_generated/api.js';
 import { generateText } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { authenticateRequest } from './middleware.js';
 import { convexTools } from './convex-tools.js';
-import { stepCountIs } from 'ai';
 import 'dotenv/config';
 
 // Initialize Express app
