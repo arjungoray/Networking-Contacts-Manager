@@ -68,7 +68,7 @@ async function handleProtectedRoute(request, env) {
     }
 
     // Authenticate the request
-    const { userId, auth } = await authenticateRequest(request);
+    const { userId, auth } = await authenticateRequest(request, env);
 
     // Get the JWT token for Convex from Clerk
     const convexToken = await auth?.getToken({ template: 'convex' });
@@ -96,7 +96,7 @@ async function handleProtectedRoute(request, env) {
     const google = createGoogleGenerativeAI({
       apiKey: env.GOOGLE_API_KEY, // Use env instead of process.env
     });
-    const tools = convexTools(convexToken);
+    const tools = convexTools(convexToken, env);
 
     // Call the AI with the enhanced system prompt
     const { text: finalResponseText } = await generateText({

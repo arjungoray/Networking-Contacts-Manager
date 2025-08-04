@@ -1,12 +1,12 @@
 import { createClerkClient } from '@clerk/backend';
 
 // Middleware to authenticate requests
-export const authenticateRequest = async (request: Request) => {
+export const authenticateRequest = async (request: Request, env: any) => {
   try {
     // Create Clerk client (moved inside function to access env at runtime)
     const clerkClient = createClerkClient({
-      secretKey: globalThis.CLERK_SECRET_KEY || process.env?.CLERK_SECRET_KEY,
-      publishableKey: globalThis.CLERK_PUBLISHABLE_KEY || process.env?.CLERK_PUBLISHABLE_KEY,
+      secretKey: env?.CLERK_SECRET_KEY,
+      publishableKey: env?.CLERK_PUBLISHABLE_KEY,
     });
 
     // Get the authorization header from the request
@@ -20,7 +20,7 @@ export const authenticateRequest = async (request: Request) => {
     const token = authHeader.replace('Bearer ', '');
 
     // Validate and construct the URL
-    const baseUrl = globalThis.BASE_URL || process.env?.BASE_URL || 'http://localhost:8787';
+    const baseUrl = env?.BASE_URL || 'https://ai-caption-backend.arjungoray.workers.dev/';
     const url = new URL(request.url, baseUrl);
 
     // Create a Request object
