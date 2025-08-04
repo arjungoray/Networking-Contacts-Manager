@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "start": "bun run ./src/app.js",
-    "build": "bun run ./src/app.js"
+    "build": "bun build ./src/worker.js --outdir ./dist --target browser",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.1",

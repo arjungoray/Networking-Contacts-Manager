@@ -4,10 +4,15 @@ import { z } from "zod";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "./convex/_generated/api";
 
-const convex = new ConvexHttpClient(process.env.PUBLIC_CONVEX_URL);
-
 // This factory function injects the user's auth token into the tools
 export const convexTools = (convexToken) => {
+  // Create a new Convex client instance for each request
+  const convexUrl = globalThis.PUBLIC_CONVEX_URL || process.env?.PUBLIC_CONVEX_URL;
+  if (!convexUrl) {
+    throw new Error('PUBLIC_CONVEX_URL environment variable is not set');
+  }
+
+  const convex = new ConvexHttpClient(convexUrl);
   // Set the auth token for all subsequent requests
   convex.setAuth(convexToken);
 
