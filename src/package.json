@@ -1,0 +1,23 @@
+{
+  "name": "ai-caption-backend2",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "bun run app.js"
+  },
+  "dependencies": {
+    "@ai-sdk/google": "^2.0.1",
+    "@clerk/backend": "^2.6.2",
+    "@types/bun": "^1.2.19",
+    "ai": "^5.0.2",
+    "convex": "^1.25.4",
+    "cookie-parser": "~1.4.4",
+    "cors": "^2.8.5",
+    "debug": "~2.6.9",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "http-errors": "~1.6.3",
+    "jade": "~1.11.0",
+    "morgan": "~1.9.1"
+  }
+}

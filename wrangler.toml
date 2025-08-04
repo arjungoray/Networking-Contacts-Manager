@@ -1,0 +1,12 @@
+# Wrangler configuration for Cloudflare Workers deployment
+# Update the name, account_id, and other fields as needed
+name = "ai-caption-backend"
+type = "javascript"
+main = "src/app.js"
+compatibility_date = "2025-08-04"
+
+[build]
+command = "npm run build"
+
+[site]
+bucket = "public"
