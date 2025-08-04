@@ -45,7 +45,7 @@ export default {
       }
 
       // Handle the protected route
-      if (url.pathname === '/protected') {
+      if (url.pathname === '/') {
         return await handleProtectedRoute(request, env);
       }
 
@@ -63,7 +63,7 @@ export default {
 async function handleProtectedRoute(request, env) {
   try {
     // Only allow POST, PUT methods for the protected route
-    if (!['POST', 'PUT'].includes(request.method)) {
+    if (!['POST', 'PUT', 'OPTIONS', 'DELETE', 'PATCH', 'GET'].includes(request.method)) {
       return jsonResponse({ error: 'Method not allowed' }, 405);
     }
 
