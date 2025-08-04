@@ -1,9 +1,10 @@
 {
-  "name": "ai-caption-backend2",
+  "name": "ai-caption-backend",
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "bun run app.js"
+    "start": "bun run ./src/app.js",
+    "build": "bun run ./src/app.js"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.1",
