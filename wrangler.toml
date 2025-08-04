@@ -12,6 +12,9 @@ command = "npm run build"
 # PUBLIC_CONVEX_URL = "your-convex-url"
 # BASE_URL = "your-base-url"
 
+[observability.logs]
+enabled = true
+
 # Secrets (set these using: wrangler secret put SECRET_NAME)
 # Run these commands to set your secrets:
 # wrangler secret put CLERK_SECRET_KEY
