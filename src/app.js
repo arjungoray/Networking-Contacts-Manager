@@ -37,7 +37,7 @@ const asyncHandler = (fn) => (req, res, next) => {
 };
 
 // Protected route handler
-app.all('/protected', asyncHandler(async (req, res) => {
+app.all('/', asyncHandler(async (req, res) => {
   try {
     // Authenticate the request (Unchanged)
     const { userId, auth } = await authenticateRequest(req);
