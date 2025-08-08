@@ -101,6 +101,76 @@ const resolveContactIdsSchema = z.object({
     .describe("Optional. Max number of matches to return (default determined by server)."),
 });
 
+const createInteractionSchema = z.object({
+  contactQuery: z
+    .string()
+    .describe(
+      "Information to identify the contact (e.g., name, email, company)."
+    ),
+  title: z.string().describe("A short title for the interaction."),
+  notes: z.string().optional().describe("Optional notes about the interaction."),
+  interactionType: z
+    .string()
+    .describe("The type of interaction (e.g., meeting, call, email)."),
+  tags: z
+    .array(z.string())
+    .optional()
+    .describe("Optional array of tag IDs associated with the interaction."),
+  itemsDiscussed: z
+    .array(z.string())
+    .optional()
+    .describe("Optional list of items discussed."),
+  location: z.string().optional().describe("Where the interaction took place."),
+  dateTime: z
+    .number()
+    .describe("Unix timestamp in milliseconds when the interaction occurred."),
+  duration: z
+    .number()
+    .optional()
+    .describe("Duration of the interaction in minutes."),
+  followUpRequired: z
+    .boolean()
+    .optional()
+    .describe("Whether a follow-up is required."),
+  followUpDate: z
+    .number()
+    .optional()
+    .describe("Unix timestamp for when follow-up should occur."),
+});
+
+const updateInteractionSchema = z.object({
+  id: z.string().describe("The unique ID of the interaction to update."),
+  title: z.string().describe("A short title for the interaction."),
+  notes: z.string().optional().describe("Optional notes about the interaction."),
+  interactionType: z
+    .string()
+    .describe("The type of interaction (e.g., meeting, call, email)."),
+  tags: z
+    .array(z.string())
+    .optional()
+    .describe("Optional array of tag IDs associated with the interaction."),
+  itemsDiscussed: z
+    .array(z.string())
+    .optional()
+    .describe("Optional list of items discussed."),
+  location: z.string().optional().describe("Where the interaction took place."),
+  dateTime: z
+    .number()
+    .describe("Unix timestamp in milliseconds when the interaction occurred."),
+  duration: z
+    .number()
+    .optional()
+    .describe("Duration of the interaction in minutes."),
+  followUpRequired: z
+    .boolean()
+    .optional()
+    .describe("Whether a follow-up is required."),
+  followUpDate: z
+    .number()
+    .optional()
+    .describe("Unix timestamp for when follow-up should occur."),
+});
+
 // This factory function injects the user's auth token into the tools
 export const convexTools = (convexToken: string, env: ConvexToolsEnv) => {
   console.log("[CONVEX-TOOLS] Initializing convex tools factory");
@@ -665,8 +735,73 @@ export const convexTools = (convexToken: string, env: ConvexToolsEnv) => {
         },
       }),
 
-// --- TAGS: CRUD ---
-listTags: tool({
+      createInteraction: tool({
+        description:
+          "Log an interaction with a contact identified by name, email, or other information.",
+        inputSchema: createInteractionSchema,
+        execute: async (params) => {
+          console.log("[CONVEX-TOOLS] createInteraction: Starting execution");
+          console.log(
+            "[CONVEX-TOOLS] createInteraction: Parameters:",
+            params,
+          );
+
+          try {
+            const result = await convex.mutation(
+              api.contactHistory.createContactHistoryByQuery,
+              params as any,
+            );
+            console.log(
+              "[CONVEX-TOOLS] createInteraction: Result from mutation:",
+              result,
+            );
+            return { success: true, result, data: result };
+          } catch (error) {
+            console.error(
+              "[CONVEX-TOOLS] createInteraction: ERROR occurred:",
+              error,
+            );
+            const errorMessage =
+              error instanceof Error ? error.message : "Unknown error occurred";
+            return { success: false, error: errorMessage };
+          }
+        },
+      }),
+
+      updateInteraction: tool({
+        description: "Update an existing interaction by its ID.",
+        inputSchema: updateInteractionSchema,
+        execute: async (params) => {
+          console.log("[CONVEX-TOOLS] updateInteraction: Starting execution");
+          console.log(
+            "[CONVEX-TOOLS] updateInteraction: Parameters:",
+            params,
+          );
+
+          try {
+            const result = await convex.mutation(
+              api.contactHistory.updateContactHistory,
+              params as any,
+            );
+            console.log(
+              "[CONVEX-TOOLS] updateInteraction: Result from mutation:",
+              result,
+            );
+            return { success: true, result, data: result };
+          } catch (error) {
+            console.error(
+              "[CONVEX-TOOLS] updateInteraction: ERROR occurred:",
+              error,
+            );
+            const errorMessage =
+              error instanceof Error ? error.message : "Unknown error occurred";
+            return { success: false, error: errorMessage };
+          }
+        },
+      }),
+
+      // --- TAGS: CRUD ---
+      listTags: tool({
 description: "List all tags for the authenticated user.",
 inputSchema: z.object({}),
 execute: async () => {

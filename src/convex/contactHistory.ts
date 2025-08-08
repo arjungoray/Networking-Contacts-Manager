@@ -1,11 +1,10 @@
 import { v } from "convex/values";
-import { Id } from "./_generated/dataModel";
 import { mutation, query } from './_generated/server';
 import { getUser } from './auth';
 
 export const createContactHistory = mutation({
     args: {
-        contactId: v.string(),
+        contactId: v.id("contacts"),
         title: v.string(),
         notes: v.optional(v.string()),
         interactionType: v.string(),
@@ -21,13 +20,13 @@ export const createContactHistory = mutation({
         const user = await getUser(ctx);
         
         // Verify the contact belongs to the user
-        const contact = await ctx.db.get(args.contactId as Id<"contacts">);
+        const contact = await ctx.db.get(args.contactId);
         if (!contact || contact.userId !== (user as any)._id) {
             throw new Error("Contact not found or access denied");
         }
 
         const historyId = await ctx.db.insert('contactHistory', {
-            contactId: args.contactId as Id<"contacts">,
+            contactId: args.contactId,
             userId: (user as any)._id,
             title: args.title,
             notes: args.notes,
@@ -44,7 +43,7 @@ export const createContactHistory = mutation({
         });
 
         // Update the contact's lastContact field
-        await ctx.db.patch(args.contactId as Id<"contacts">, {
+        await ctx.db.patch(args.contactId, {
             lastContact: args.dateTime,
             updatedAt: Date.now(),
         });
@@ -53,42 +52,9 @@ export const createContactHistory = mutation({
     },
 });
 
-export const getContactHistory = query({
-    args: { contactId: v.string() },
-    handler: async (ctx, args) => {
-        const user = await getUser(ctx);
-        
-        // Verify the contact belongs to the user
-        const contact = await ctx.db.get(args.contactId as Id<"contacts">);
-        if (!contact || contact.userId !== (user as any)._id) {
-            throw new Error("Contact not found or access denied");
-        }
-
-        return await ctx.db.query('contactHistory')
-            .withIndex('contactId_dateTime', (q) => q.eq('contactId', args.contactId as Id<"contacts">))
-            .order('desc')
-            .collect();
-    },
-});
-
-export const getContactHistoryById = query({
-    args: { id: v.string() },
-    handler: async (ctx, args) => {
-        const user = await getUser(ctx);
-        const history = await ctx.db.get(args.id as Id<"contactHistory">);
-        
-        // Ensure the history belongs to the current user
-        if (history && history.userId === (user as any)._id) {
-            return history;
-        }
-        
-        return null;
-    },
-});
-
-export const updateContactHistory = mutation({
+export const createContactHistoryByQuery = mutation({
     args: {
-        id: v.string(),
+        contactQuery: v.string(),
         title: v.string(),
         notes: v.optional(v.string()),
         interactionType: v.string(),
@@ -102,14 +68,110 @@ export const updateContactHistory = mutation({
     },
     handler: async (ctx, args) => {
         const user = await getUser(ctx);
-        const history = await ctx.db.get(args.id as Id<"contactHistory">);
+
+        const matches = await ctx.db
+            .query('contacts')
+            .withSearchIndex('search_summary', (q) =>
+                q.search('searchSummary', args.contactQuery).eq('userId', (user as any)._id)
+            )
+            .collect();
+
+        if (matches.length === 0) {
+            return { status: 'not_found' };
+        }
+
+        if (matches.length > 1) {
+            return {
+                status: 'ambiguous',
+                matches: matches.map((c) => ({ _id: c._id, name: c.name, email: c.email })),
+            };
+        }
+
+        const contactId = matches[0]._id;
+
+        const historyId = await ctx.db.insert('contactHistory', {
+            contactId,
+            userId: (user as any)._id,
+            title: args.title,
+            notes: args.notes,
+            interactionType: args.interactionType,
+            tags: args.tags,
+            itemsDiscussed: args.itemsDiscussed,
+            location: args.location,
+            dateTime: args.dateTime,
+            duration: args.duration,
+            followUpRequired: args.followUpRequired,
+            followUpDate: args.followUpDate,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+        });
+
+        await ctx.db.patch(contactId, {
+            lastContact: args.dateTime,
+            updatedAt: Date.now(),
+        });
+
+        return { status: 'success', historyId };
+    },
+});
+
+export const getContactHistory = query({
+    args: { contactId: v.id("contacts") },
+    handler: async (ctx, args) => {
+        const user = await getUser(ctx);
+        
+        // Verify the contact belongs to the user
+        const contact = await ctx.db.get(args.contactId);
+        if (!contact || contact.userId !== (user as any)._id) {
+            throw new Error("Contact not found or access denied");
+        }
+
+        return await ctx.db.query('contactHistory')
+            .withIndex('contactId_dateTime', (q) => q.eq('contactId', args.contactId))
+            .order('desc')
+            .collect();
+    },
+});
+
+export const getContactHistoryById = query({
+    args: { id: v.id("contactHistory") },
+    handler: async (ctx, args) => {
+        const user = await getUser(ctx);
+        const history = await ctx.db.get(args.id);
+        
+        // Ensure the history belongs to the current user
+        if (history && history.userId === (user as any)._id) {
+            return history;
+        }
+        
+        return null;
+    },
+});
+
+export const updateContactHistory = mutation({
+    args: {
+        id: v.id("contactHistory"),
+        title: v.string(),
+        notes: v.optional(v.string()),
+        interactionType: v.string(),
+        tags: v.optional(v.array(v.string())),
+        itemsDiscussed: v.optional(v.array(v.string())),
+        location: v.optional(v.string()),
+        dateTime: v.number(),
+        duration: v.optional(v.number()),
+        followUpRequired: v.optional(v.boolean()),
+        followUpDate: v.optional(v.number()),
+    },
+    handler: async (ctx, args) => {
+        const user = await getUser(ctx);
+        const history = await ctx.db.get(args.id);
 
         // Ensure the history exists and belongs to the current user
         if (!history || history.userId !== (user as any)._id) {
             throw new Error("Contact history not found or access denied");
         }
 
-        return await ctx.db.patch(args.id as Id<"contactHistory">, {
+        return await ctx.db.patch(args.id, {
             title: args.title,
             notes: args.notes,
             interactionType: args.interactionType,
@@ -127,15 +189,15 @@ export const updateContactHistory = mutation({
 
 export const deleteContactHistory = mutation({
     args: {
-        historyIds: v.array(v.string()),
+        historyIds: v.array(v.id("contactHistory")),
     },
     handler: async (ctx, args) => {
         const user = await getUser(ctx);
         
         for (const historyId of args.historyIds) {
-            const history = await ctx.db.get(historyId as Id<"contactHistory">);
+            const history = await ctx.db.get(historyId);
             if (history && history.userId === (user as any)._id) {
-                await ctx.db.delete(historyId as Id<"contactHistory">);
+                await ctx.db.delete(historyId);
             }
         }
         
@@ -157,18 +219,18 @@ export const getRecentContactHistory = query({
 });
 
 export const getContactHistoryStats = query({
-    args: { contactId: v.string() },
+    args: { contactId: v.id("contacts") },
     handler: async (ctx, args) => {
         const user = await getUser(ctx);
         
         // Verify the contact belongs to the user
-        const contact = await ctx.db.get(args.contactId as Id<"contacts">);
+        const contact = await ctx.db.get(args.contactId);
         if (!contact || contact.userId !== (user as any)._id) {
             throw new Error("Contact not found or access denied");
         }
 
         const allHistory = await ctx.db.query('contactHistory')
-            .withIndex('contactId', (q) => q.eq('contactId', args.contactId as Id<"contacts">))
+            .withIndex('contactId', (q) => q.eq('contactId', args.contactId))
             .collect();
 
         const totalInteractions = allHistory.length;
