@@ -15,10 +15,12 @@ This endpoint provides a protected interface for interacting with a world-class 
 ## Request
 
 ### Headers
+
 - `Authorization`: Bearer token (required, provided by Clerk authentication)
 - `Content-Type`: `application/json`
 
 ### Body
+
 ```
 {
   "messages": [
@@ -31,6 +33,7 @@ This endpoint provides a protected interface for interacting with a world-class 
   ]
 }
 ```
+
 - `messages` (array, required): The chat history or conversation context. Must be an array of message objects. If missing or not an array, the API returns a 400 error.
 
 ---
@@ -38,9 +41,11 @@ This endpoint provides a protected interface for interacting with a world-class 
 ## Responses
 
 ### Success (Execution Mode)
+
 - **Status:** `200 OK`
 - **Content-Type:** `application/json`
 - **Body:**
+
 ```
 {
   "type": "data",
@@ -51,14 +56,17 @@ This endpoint provides a protected interface for interacting with a world-class 
   }
 }
 ```
+
 - `success`: Boolean indicating if the operation succeeded.
 - `message`: User-friendly summary of the result (e.g., "Contact 'Jane Doe' was created.").
 - `data`: The relevant data (e.g., contact object, array of contacts, or deleted contact ID).
 
 ### Clarification (Clarification Mode)
+
 - **Status:** `200 OK`
 - **Content-Type:** `application/json`
 - **Body:**
+
 ```
 {
   "type": "text",
@@ -67,12 +75,15 @@ This endpoint provides a protected interface for interacting with a world-class 
   }
 }
 ```
+
 - The assistant will respond with a plain-text clarifying question if the user's request is ambiguous or more information is needed.
 
 ### Error
+
 - **Status:** `401 Unauthorized` or `400 Bad Request` or `500 Internal Server Error`
 - **Content-Type:** `application/json`
 - **Body:**
+
 ```
 {
   "type": "error",
@@ -87,6 +98,7 @@ This endpoint provides a protected interface for interacting with a world-class 
 ## Example Usage
 
 ### Request
+
 ```
 POST /
 Authorization: Bearer <token>
@@ -100,6 +112,7 @@ Content-Type: application/json
 ```
 
 ### Success Response
+
 ```
 {
   "type": "data",
@@ -116,6 +129,7 @@ Content-Type: application/json
 ```
 
 ### Clarification Response
+
 ```
 {
   "type": "text",
@@ -126,6 +140,7 @@ Content-Type: application/json
 ```
 
 ### Error Response
+
 ```
 {
   "type": "error",
@@ -138,6 +153,7 @@ Content-Type: application/json
 ---
 
 ## Notes
+
 - The endpoint is protected and requires valid authentication.
 - The AI agent will always return either a structured JSON object (for successful operations) or a plain-text clarifying question.
 - All errors are returned in a consistent error format.

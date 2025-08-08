@@ -1,7 +1,10 @@
-import { createClerkClient } from '@clerk/backend';
+import { createClerkClient } from "@clerk/backend";
 
 // Middleware to authenticate requests
-export const authenticateRequest = async (request: Request, env: any) => {
+export const authenticateRequest = async (
+  request: Request, 
+  env: any
+): Promise<{ userId: string; auth: any }> => {
   try {
     // Create Clerk client (moved inside function to access env at runtime)
     const clerkClient = createClerkClient({
@@ -10,17 +13,18 @@ export const authenticateRequest = async (request: Request, env: any) => {
     });
 
     // Get the authorization header from the request
-    const authHeader = request.headers.get('authorization');
+    const authHeader = request.headers.get("authorization");
 
     if (!authHeader) {
-      throw new Error('Authorization header missing');
+      throw new Error("Authorization header missing");
     }
 
     // Extract the token from the Bearer header
-    const token = authHeader.replace('Bearer ', '');
+    const token = authHeader.replace("Bearer ", "");
 
     // Validate and construct the URL
-    const baseUrl = env?.BASE_URL || 'https://ai-caption-backend.arjungoray.workers.dev/';
+    const baseUrl =
+      env?.BASE_URL || "https://ai-caption-backend.arjungoray.workers.dev/";
     const url = new URL(request.url, baseUrl);
 
     // Create a Request object
@@ -35,13 +39,13 @@ export const authenticateRequest = async (request: Request, env: any) => {
     const toAuth = client.toAuth();
 
     // Check if the response contains a userId
-    if (toAuth && toAuth.isAuthenticated && 'userId' in toAuth) {
+    if (toAuth && toAuth.isAuthenticated && "userId" in toAuth) {
       return { userId: toAuth.userId, auth: toAuth };
     } else {
-      throw new Error('Unauthorized');
+      throw new Error("Unauthorized");
     }
   } catch (error) {
-    console.error('Authentication error:', error);
+    console.error("Authentication error:", error);
     throw error;
   }
 };
