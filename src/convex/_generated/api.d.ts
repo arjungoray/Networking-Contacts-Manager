@@ -14,10 +14,13 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as auth from "../auth.js";
+import type * as chats from "../chats.js";
 import type * as contactHistory from "../contactHistory.js";
 import type * as contactSearch from "../contactSearch.js";
 import type * as contacts from "../contacts.js";
 import type * as http from "../http.js";
+import type * as messages from "../messages.js";
+import type * as settings from "../settings.js";
 import type * as tags from "../tags.js";
 import type * as users from "../users.js";
 
@@ -31,10 +34,13 @@ import type * as users from "../users.js";
  */
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  chats: typeof chats;
   contactHistory: typeof contactHistory;
   contactSearch: typeof contactSearch;
   contacts: typeof contacts;
   http: typeof http;
+  messages: typeof messages;
+  settings: typeof settings;
   tags: typeof tags;
   users: typeof users;
 }>;

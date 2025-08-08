@@ -1,39 +1,60 @@
 import type { UserJSON } from "@clerk/backend";
 import { v, Validator } from "convex/values";
-import { internalMutation, QueryCtx } from "./_generated/server";
+import { internalMutation, QueryCtx, query } from "./_generated/server";
 
 export const upsertFromClerk = internalMutation({
-  args: { data: v.any() as Validator<UserJSON> },
-  handler: async (ctx, { data }) => {
-    const userAttributes = {
-      name: `${data.first_name} ${data.last_name}`,
-      email: data.email_addresses[0].email_address,
-      externalId: data.id,
-      imageUrl: data.image_url,
-    };
-    const user = await userByExternalId(ctx, userAttributes.externalId);
-    if (user === null) {
-      await ctx.db.insert("users", userAttributes);
-    } else {
-      await ctx.db.patch(user._id, userAttributes);
+    args: {data:v.any() as Validator<UserJSON>},
+    handler: async (ctx, {data }) => {
+        const userAttributes = {
+            name: `${data.first_name} ${data.last_name}`,
+            email: data.email_addresses[0].email_address,
+            externalId: data.id,
+            imageUrl: data.image_url,
+        }
+        const user = await userByExternalId(ctx, userAttributes.externalId);
+        if (user === null) {
+            await ctx.db.insert("users", userAttributes);
+        } else {
+            await ctx.db.patch(user._id, userAttributes);
+        }
     }
-  },
-});
+})
 
 export const deleteFromClerk = internalMutation({
-  args: { clerkUserId: v.string() },
-  handler: async (ctx, { clerkUserId }) => {
-    const user = await userByExternalId(ctx, clerkUserId);
-    if (user === null) {
-      return;
+    args: {clerkUserId: v.string()},
+    handler: async (ctx, {clerkUserId}) => {
+        const user = await userByExternalId(ctx, clerkUserId);
+        if (user === null) {
+            return;
+        }
+        await ctx.db.delete(user._id);
     }
-    await ctx.db.delete(user._id);
-  },
-});
+})
 
-export async function userByExternalId(ctx: QueryCtx, externalId: string) {
-  return await ctx.db
+export async function userByExternalId(
+    ctx: QueryCtx,
+    externalId: string
+) {
+    return await ctx.db
     .query("users")
     .withIndex("externalId", (q) => q.eq("externalId", externalId))
     .unique();
 }
+
+export const currentUser = query({
+    args: {},
+    handler: async (ctx) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (!identity) {
+            return null;
+        }
+        return await userByExternalId(ctx, identity.subject);
+    }
+});
+
+export const getUserByExternalId = query({
+    args: { externalId: v.string() },
+    handler: async (ctx, { externalId }) => {
+        return await userByExternalId(ctx, externalId);
+    }
+});

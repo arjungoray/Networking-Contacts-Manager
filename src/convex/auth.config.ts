@@ -8,5 +8,5 @@ export default {
       domain: "https://driven-anteater-35.clerk.accounts.dev",
       applicationID: "convex",
     },
-  ],
+  ]
 };
