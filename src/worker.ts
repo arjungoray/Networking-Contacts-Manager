@@ -179,7 +179,7 @@ async function handleProtectedRoute(request: Request, env: any): Promise<Respons
     const groq = createGroq({
       apiKey: env.GROQ_API_KEY,
     });
-    const model = groq("qwen/qwen3-32b");
+    const model = groq("openai/gpt-oss-120b");
 
     /*
     // Initialize Google provider with explicit API key

@@ -26561,7 +26561,7 @@ async function handleProtectedRoute(request, env) {
     const groq2 = createGroq({
       apiKey: env.GROQ_API_KEY
     });
-    const model = groq2("qwen/qwen3-32b");
+    const model = groq2("openai/gpt-oss-120b");
     const tools = convexTools(convexToken, env);
     console.log("[WORKER] AI Request - Messages:", messages.length, "Tools:", Object.keys(tools));
     const formattedMessages = messages.filter((msg) => msg.role === "user" || msg.role === "assistant").filter((msg) => msg.content && msg.content.trim() !== "").map((msg) => ({
