@@ -170,11 +170,11 @@ export const updateContact = mutation({
         let searchSummary = `${newSearchData.name || ''} ${newSearchData.email || ''} ${newSearchData.phone || ''} ${((newSearchData.emails || []) as string[]).join(' ')} ${((newSearchData.phones || []) as string[]).join(' ')} ${newSearchData.jobTitle || ''} ${newSearchData.company || ''} ${newSearchData.location || ''} ${newSearchData.linkedin || ''} ${newSearchData.notes || ''}`;
         
         if (newSearchData.tags && newSearchData.tags.length > 0) {
-            for (const tagId of newSearchData.tags) {
-                const tag = await ctx.db.get(tagId);
-                if (tag) {
-                    searchSummary += ` ${tag.name}`;
-                }
+                                                for (const tagId of newSearchData.tags) {
+                                                        const tag = await ctx.db.get(tagId);
+                                                        if (tag && tag._id && (tag._id as any).__tableName === "tags") {
+                                                            searchSummary += ` ${(tag as { name: string }).name}`;
+                                                        }
             }
         }
 

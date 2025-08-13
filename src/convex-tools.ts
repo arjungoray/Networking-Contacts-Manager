@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { ConvexHttpClient } from "convex/browser";
-import { api } from "./convex/_generated/api.js";
+import { api } from "../convex/_generated/api.js";
 import { tool } from 'ai';
 
 // Type definitions for better TypeScript safety
